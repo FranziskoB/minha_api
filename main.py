@@ -5,7 +5,7 @@ import numpy as np
 
 app = FastAPI()
 
-with open("model.pkl", "rb") as f:
+with open("churn_model.pkl", "rb") as f:
     modelo = pickle.load(f)
 
 class Entrada(BaseModel):
