@@ -7,7 +7,7 @@ import numpy as np
 app = FastAPI()
 
 # Carregar o modelo treinado
-with open("churn_model", "rb") as f:
+with open("churn_model.pkl", "rb") as f:
     modelo = pickle.load(f)
 
 # Modelo dos dados de entrada
