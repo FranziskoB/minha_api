@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fastapi-api
+    name: ml-api
     env: python
     plan: free
     buildCommand: ""

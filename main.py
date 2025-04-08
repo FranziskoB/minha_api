@@ -1,11 +1,21 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+import pickle
+import numpy as np
 
+# Criação do app FastAPI
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"mensagem": "API FastAPI no ar com Render!"}
+# Carregar o modelo treinado
+with open("model.pkl", "rb") as f:
+    modelo = pickle.load(f)
 
-@app.get("/soma")
-def somar(a: int, b: int):
-    return {"resultado": a + b}
+# Modelo dos dados de entrada
+class Entrada(BaseModel):
+    features: list[float]  # ou dict, depende do modelo
+
+@app.post("/predict")
+def prever(dados: Entrada):
+    X = np.array(dados.features).reshape(1, -1)
+    predicao = modelo.predict(X)
+    return {"predicao": predicao.tolist()}
