@@ -1,27 +1,32 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pickle
 import numpy as np
 
-# Criação do app FastAPI
 app = FastAPI()
 
-# Carregar o modelo treinado
+# Habilitar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Pode restringir para domínios específicos em produção
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Carregar modelo
 with open("churn_model.pkl", "rb") as f:
     modelo = pickle.load(f)
 
-# Modelo dos dados de entrada
 class Entrada(BaseModel):
-    features: list[float]  # ou dict, depende do modelo
+    features: list[float]
 
 @app.post("/predict")
 def prever(dados: Entrada):
     X = np.array(dados.features).reshape(1, -1)
-    
-    # Verifica se o modelo possui o método predict_proba
     if hasattr(modelo, "predict_proba"):
-        probabilidade_churn = modelo.predict_proba(X)[0][1]  # Probabilidade da classe positiva (churn)
-        percentual = round(probabilidade_churn * 100, 2)  # Converte para percentual com 2 casas decimais
-        return {"probabilidade_churn_percentual": percentual}
+        prob_churn = modelo.predict_proba(X)[0][1]
+        return {"probabilidade_churn_percentual": round(prob_churn * 100, 2)}
     else:
-        return {"erro": "O modelo não suporta previsão de probabilidade (predict_proba)."}
+        return {"erro": "Modelo não suporta predict_proba"}
