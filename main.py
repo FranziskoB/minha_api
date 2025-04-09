@@ -17,5 +17,11 @@ class Entrada(BaseModel):
 @app.post("/predict")
 def prever(dados: Entrada):
     X = np.array(dados.features).reshape(1, -1)
-    predicao = modelo.predict(X)
-    return {"predicao": predicao.tolist()}
+    
+    # Verifica se o modelo possui o método predict_proba
+    if hasattr(modelo, "predict_proba"):
+        probabilidade_churn = modelo.predict_proba(X)[0][1]  # Probabilidade da classe positiva (churn)
+        percentual = round(probabilidade_churn * 100, 2)  # Converte para percentual com 2 casas decimais
+        return {"probabilidade_churn_percentual": percentual}
+    else:
+        return {"erro": "O modelo não suporta previsão de probabilidade (predict_proba)."}
